@@ -161,20 +161,22 @@
                     <h2 style="font-size: 1.2rem; font-weight: 700;">إدارة الصلاحيات</h2>
                 </div>
 
-                <div class="overflow-x-auto w-full">
-                    <table class="admin-table w-full block md:table border-collapse md:border-separate md:border-spacing-y-2">
-                        <thead class="hidden md:table-header-group">
-                            <tr>
-                                <th class="text-[var(--text-muted)] text-[0.85rem] uppercase px-[15px] pb-2.5 text-right font-bold">المستخدم</th>
-                                <th class="text-[var(--text-muted)] text-[0.85rem] uppercase px-[15px] pb-2.5 text-right font-bold">المتاجر المتاحة</th>
-                                <th class="text-[var(--text-muted)] text-[0.85rem] uppercase px-[15px] pb-2.5 text-right font-bold">رفع الملفات</th>
-                                <th class="text-[var(--text-muted)] text-[0.85rem] uppercase px-[15px] pb-2.5 text-right font-bold">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body">
-                            <!-- User rows will be injected here -->
-                        </tbody>
-                    </table>
+                <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm mt-4">
+                    <div class="w-full overflow-x-auto">
+                        <table class="w-full text-right whitespace-nowrap min-w-[600px]">
+                            <thead>
+                                <tr class="bg-indigo-50/50 border-b border-[var(--border)]">
+                                    <th class="py-4 px-5 text-slate-500 font-black">المستخدم</th>
+                                    <th class="py-4 px-5 text-slate-500 font-black">المتاجر المتاحة</th>
+                                    <th class="py-4 px-5 text-slate-500 font-black">رفع الملفات</th>
+                                    <th class="py-4 px-5 text-slate-500 font-black text-left">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="bg-white/50">
+                                <!-- User rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
