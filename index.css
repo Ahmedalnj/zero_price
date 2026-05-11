@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
-        /* Mobile-First Premium Glassmorphism Theme */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
