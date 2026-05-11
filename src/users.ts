@@ -28,6 +28,7 @@ export async function renderUsersTable() {
             <td data-label="رفع الملفات" class="py-3 px-4">${u.permissions.canUpload ? '✅' : '❌'}</td>
             <td data-label="إجراءات" class="py-3 px-4 text-left">
                 <button class="edit-user-btn bg-white border border-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition-all hover:bg-slate-50 active:scale-95 shadow-sm" data-id="${u.id}">تعديل</button>
+                <button class="delete-user-btn bg-rose-50 border border-rose-200 text-rose-600 font-bold px-4 py-2 rounded-xl transition-all hover:bg-rose-100 active:scale-95 shadow-sm mr-2" data-id="${u.id}">حذف</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -36,6 +37,20 @@ export async function renderUsersTable() {
     document.querySelectorAll('.edit-user-btn').forEach((btn: any) => {
         btn.onclick = () => editUser(btn.dataset.id);
     });
+    document.querySelectorAll('.delete-user-btn').forEach((btn: any) => {
+        btn.onclick = () => deleteUser(btn.dataset.id);
+    });
+}
+
+export async function deleteUser(id: string) {
+    if (!confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')) return;
+    const { error } = await supabase.from('users').delete().eq('id', id);
+    if (error) {
+        showToast('خطأ أثناء الحذف: ' + error.message, 'error');
+    } else {
+        showToast('تم حذف المستخدم بنجاح', 'success');
+        await renderUsersTable();
+    }
 }
 
 export function showUserModal() {

@@ -107,7 +107,7 @@ function renderResults(products: any[], container: HTMLElement) {
             </div>
             <div class="flex flex-col items-end gap-1 min-w-fit">
                 <div class="text-[clamp(1.2rem,4.5vw,1.5rem)] font-black text-indigo-600 bg-indigo-50/50 px-3 py-1 rounded-xl whitespace-nowrap">
-                    <span class="text-[0.7rem] ml-1 text-indigo-400 font-bold uppercase tracking-wider">ر.س</span>${p.price.toLocaleString()}
+                    <span class="text-[0.7rem] ml-1 text-indigo-400 font-bold uppercase tracking-wider">د.ل</span>${p.price.toLocaleString()}
                 </div>
             </div>
         `;

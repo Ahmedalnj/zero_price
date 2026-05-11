@@ -33,6 +33,7 @@ export async function handleLogin() {
         setActiveUser(profile);
         localStorage.setItem('activeUser', JSON.stringify(profile));
         
+        updateUIForUser();
         loginScreen.style.display = 'none';
         mainContainer.style.display = 'flex';
         navigate();
@@ -64,6 +65,7 @@ export function checkSession() {
     const savedUser = localStorage.getItem('activeUser');
     if (savedUser) {
         setActiveUser(JSON.parse(savedUser));
+        updateUIForUser();
         loginScreen.style.display = 'none';
         mainContainer.style.display = 'flex';
         navigate();

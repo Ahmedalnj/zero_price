@@ -28,13 +28,34 @@ export function handleFileUpload(e: Event) {
             const data = new Uint8Array(event.target.result as ArrayBuffer);
             const workbook = XLSX.read(data, { type: 'array' });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            if (rows.length === 0) throw new Error('الملف فارغ');
 
-            if (json.length === 0) throw new Error('الملف فارغ');
+            let headerRowIdx = -1;
+            let nameColIdx = -1;
+            let priceColIdx = -1;
+            let skuColIdx = -1;
 
-            const nameKey = Object.keys(json[0] as any).find(k => k.trim().toLowerCase() === 'name' || k.trim() === 'الاسم');
-            const priceKey = Object.keys(json[0] as any).find(k => k.trim().toLowerCase() === 'price' || k.trim() === 'السعر');
-            if (!nameKey || !priceKey) throw new Error('يرجى التأكد من تسمية الأعمدة بـ name و price');
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i] as any[];
+                if (!Array.isArray(row)) continue;
+                
+                for (let j = 0; j < row.length; j++) {
+                    if (typeof row[j] !== 'string') continue;
+                    const val = String(row[j]).trim().toLowerCase();
+                    
+                    if (val === 'name' || val === 'الاسم' || val === 'اسم الصنف' || val === 'بيان الصنف') nameColIdx = j;
+                    if (val === 'price' || val === 'السعر') priceColIdx = j;
+                    if (val === 'sku' || val === 'رقم الصنف') skuColIdx = j;
+                }
+                
+                if (nameColIdx !== -1 && priceColIdx !== -1) {
+                    headerRowIdx = i;
+                    break;
+                }
+            }
+
+            if (headerRowIdx === -1) throw new Error('يرجى التأكد من وجود أعمدة (بيان الصنف / اسم الصنف) و (السعر)');
 
             uploadStatus.innerHTML = `<span class="text-indigo-500 font-bold animate-pulse">جاري تحديث السحابة...</span>`;
             uploadProgressContainer.style.display = 'block';
@@ -44,11 +65,30 @@ export function handleFileUpload(e: Event) {
             const { error: delErr } = await supabase.from('products').delete().eq('store_id', targetStore);
             if (delErr) throw delErr;
 
-            const products = json.map((item: any) => ({
-                store_id: targetStore,
-                name: String(item[nameKey]).trim(),
-                price: parseFloat(item[priceKey]) || 0
-            }));
+            const products: any[] = [];
+            for (let i = headerRowIdx + 1; i < rows.length; i++) {
+                const row = rows[i] as any[];
+                if (!Array.isArray(row) || row.length === 0) continue;
+                
+                const nameVal = row[nameColIdx];
+                const priceVal = row[priceColIdx];
+                const skuVal = skuColIdx !== -1 ? row[skuColIdx] : null;
+                
+                if (nameVal === undefined || nameVal === null || String(nameVal).trim() === '') continue;
+                
+                let finalName = String(nameVal).trim();
+                if (skuVal !== undefined && skuVal !== null && String(skuVal).trim() !== '') {
+                    finalName = `[${String(skuVal).trim()}] - ${finalName}`;
+                }
+                
+                products.push({
+                    store_id: targetStore,
+                    name: finalName,
+                    price: parseFloat(priceVal as any) || 0
+                });
+            }
+
+            if (products.length === 0) throw new Error('لم يتم العثور على منتجات صالحة في الملف');
 
             // Insert in chunks of 1000
             for (let i = 0; i < products.length; i += 1000) {
@@ -61,8 +101,8 @@ export function handleFileUpload(e: Event) {
             // Update store status
             const { error: statusErr } = await supabase.from('stores').upsert({
                 id: targetStore,
-                last_upload_time: new Date().toLocaleString('ar-EG'),
-                count: json.length
+                last_upload_time: new Date().toLocaleString('en-GB'),
+                count: products.length
             });
             if (statusErr) throw statusErr;
 
