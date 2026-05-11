@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رواء - مدقق الأسعار</title>
+    <!-- SheetJS CDN -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Mobile-First Premium Glassmorphism Theme */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: rgba(79, 70, 229, 0.1);
+            --bg-gradient-1: #e0e7ff;
+            --bg-gradient-2: #fdf4ff;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.5);
+            --text-main: #1e1b4b;
+            --text-muted: #6366f1;
+            --border: rgba(255, 255, 255, 0.4);
+            --success: #10b981;
+            --error: #f43f5e;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --glass-blur: blur(16px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            overscroll-behavior-y: none;
+        }
+
+        /* Abstract Background Shapes (Performance optimized) */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            will-change: transform;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+
+        .shape-1 {
+            width: 60vw;
+            height: 60vw;
+            background: #c7d2fe;
+            top: -10%;
+            right: -10%;
+        }
+
+        .shape-2 {
+            width: 50vw;
+            height: 50vw;
+            background: #fbcfe8;
+            bottom: 10%;
+            left: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                transform: translateY(20px) scale(1.02);
+            }
+        }
+
+        /* ==========================================================================
+           BASE STYLES (Mobile First: 320px - 480px)
+           ========================================================================== */
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            min-height: 100vh;
+            /* Full screen on mobile */
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            box-shadow: var(--shadow);
+            margin: 0;
+            border-radius: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-out;
+            border: none;
+            overflow-x: hidden;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Unified Top Navigation */
+        .main-top-nav {
+            padding: 10px clamp(15px, 4vw, 30px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            gap: clamp(10px, 2vw, 20px);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .logo-box {
+            width: clamp(35px, 8vw, 45px);
+            height: clamp(35px, 8vw, 45px);
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            flex-shrink: 0;
+        }
+        
+        .nav-brand-title {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+        }
+
+        .page-nav-inline {
+            display: flex;
+            gap: clamp(10px, 2vw, 30px);
+            flex: 1;
+            justify-content: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+            scrollbar-width: none; 
+        }
+        .page-nav-inline::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-item {
+            padding: 10px 10px;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            min-height: 44px; /* Touch target size */
+            touch-action: manipulation;
+            transition: opacity 0.2s;
+        }
+        .nav-item:active {
+            opacity: 0.7;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active::after {
+            transform: scaleX(1);
+        }
+
+        .content-body {
+            padding: clamp(15px, 5vw, 40px);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Page Routing */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: slideUpFade 0.2s ease-out;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Unified Status & Shop Row */
+        .status-and-shop-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+            border: 1px solid var(--border);
+            border-radius: clamp(16px, 4vw, 24px);
+            padding: clamp(10px, 3vw, 15px) clamp(15px, 4vw, 20px);
+            margin-bottom: clamp(15px, 4vw, 25px);
+            box-shadow: var(--shadow);
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .inline-status {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            font-weight: 800;
+            text-align: right;
+            flex: 1;
+        }
+
+        .inline-status span.time {
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            color: var(--primary);
+            font-weight: 600;
+            display: inline-block;
+            background: var(--primary-light);
+            padding: 4px 10px;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        /* Forms, Inputs, & Buttons (Touch Friendly) */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            height: clamp(48px, 6vh, 60px);
+            /* Responsive height, min 48px */
+            padding: 0 20px;
+            font-size: max(16px, 1rem); /* Force 16px minimum to prevent iOS zoom */
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 14px;
+            font-family: inherit;
+            outline: none;
+            background: rgba(255, 255, 255, 0.6);
+            color: var(--text-main);
+            font-weight: 600;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            /* iOS reset */
+            touch-action: manipulation;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        .btn {
+            min-height: clamp(48px, 6vh, 60px);
+            /* Touch target */
+            padding: 0 24px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            transition: transform 0.1s, box-shadow 0.2s;
+            touch-action: manipulation;
+            /* Faster taps on mobile */
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white;
+            box-shadow: 0 8px 15px -5px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Search Container */
+        .search-container {
+            position: relative;
+            margin-bottom: clamp(20px, 5vw, 30px);
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        #search-input {
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding-left: 50px; /* Space for the clear button */
+        }
+        
+        .clear-btn {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            font-size: 1.2rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .clear-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Results List */
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 3vw, 16px);
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border);
+            border-radius: clamp(16px, 4vw, 20px);
+            padding: clamp(15px, 4vw, 20px) clamp(15px, 5vw, 30px);
+            display: grid;
+            grid-template-columns: 1fr;
+            /* Stack on mobile */
+            text-align: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            /* Top border on mobile */
+            background: var(--primary);
+        }
+
+        .product-name {
+            font-size: clamp(1.1rem, 3.5vw, 1.2rem);
+            font-weight: 800;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            font-size: clamp(1.8rem, 6vw, 2.2rem);
+            font-weight: 900;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .currency {
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            margin-right: 6px;
+            font-weight: 700;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: var(--error);
+            font-weight: 700;
+            display: none;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            border: 1px dashed var(--error);
+        }
+
+        /* User Toggle */
+        .user-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            font-weight: 700;
+            min-height: 44px; /* Touch target */
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+        }
+        .user-toggle:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        #active-username {
+            display: none;
+            /* Hidden on mobile */
+        }
+
+        /* Login Screen */
+        #login-screen {
+            background: transparent !important;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 20px;
+        }
+
+        .login-card {
+    width: min(92%, 420px);
+    background: var(--card-bg);
+    
+    padding:
+        clamp(24px, 5vw, 50px)
+        clamp(18px, 4vw, 40px);
+
+    border-radius: clamp(18px, 4vw, 30px);
+
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+
+    border: 1px solid var(--card-border);
+
+    display: flex;
+    flex-direction: column;
+
+    gap: clamp(14px, 3vw, 20px);
+
+    margin: auto;
+
+    overflow: hidden;
+}
+/* Small phones */
+@media (max-width: 480px) {
+    .login-card {
+        width: 95%;
+        padding: 22px 16px;
+        border-radius: 20px;
+    }
+}
+
+/* Tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+    .login-card {
+        width: 90%;
+    }
+}
+
+        /* Admin Table (Mobile Cards Layout) */
+        .admin-table {
+            width: 100%;
+        }
+
+        .admin-table thead {
+            display: none;
+        }
+
+        /* Hide headers on mobile */
+        .admin-table,
+        .admin-table tbody,
+        .admin-table tr,
+        .admin-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .admin-table tr {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .admin-table td {
+            padding: 10px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent !important;
+            border: none !important;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        .admin-table td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 10px;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: clamp(25px, 5vw, 40px);
+            border-radius: clamp(20px, 5vw, 30px);
+            width: 100%;
+            max-width: 500px;
+            max-height: 95vh;
+            overflow-y: auto;
+            /* Prevent overflow */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            min-height: 48px;
+            /* Touch target */
+        }
+
+        /* Upload */
+        .upload-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 30px 20px;
+            border: 2px dashed var(--primary);
+            text-align: center;
+        }
+
+        .inline-shop-select {
+            padding: 0 15px 0 35px;
+            /* space for custom arrow */
+            border-radius: 12px;
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            font-weight: 700;
+            background: rgba(79, 70, 229, 0.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234f46e5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat left 10px center / 16px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            height: 42px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            width: auto;
+            min-width: 140px;
+            outline: none;
+            transition: all 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .inline-shop-select:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-color: var(--primary);
+        }
+
+        /* ==========================================================================
+           TABLETS (481px - 768px)
+           ========================================================================== */
+        @media (min-width: 481px) {
+            .container {
+                max-width: 95%;
+                margin: 20px auto;
+                min-height: auto;
+                border-radius: 24px;
+                border: 1px solid var(--card-border);
+            }
+
+            .checkbox-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .admin-table tr {
+                padding: 15px;
+            }
+        }
+
+        /* ==========================================================================
+           SMALL LAPTOPS (769px - 1024px)
+           ========================================================================== */
+        @media (min-width: 769px) {
+            .container {
+                max-width: 900px;
+                border-radius: 30px;
+                margin: 40px auto;
+            }
+
+            .main-top-nav {
+                padding: 15px 40px;
+            }
+
+            .nav-brand-title {
+                display: block !important;
+            }
+
+            .page-nav-inline {
+                overflow-x: visible;
+                justify-content: center;
+            }
+
+            #active-username {
+                display: inline !important;
+            }
+
+            .user-toggle {
+                padding: 8px 16px !important;
+                border-radius: 14px !important;
+                background: rgba(99, 102, 241, 0.1);
+            }
+
+            .result-item {
+                grid-template-columns: 1fr auto;
+                text-align: right;
+            }
+
+            .result-item::before {
+                width: 5px;
+                height: 100%;
+                top: 0;
+                right: 0;
+            }
+
+            /* Admin Table: Restore Desktop Layout */
+            .admin-table {
+                border-collapse: separate;
+                border-spacing: 0 8px;
+            }
+
+            .admin-table thead {
+                display: table-header-group;
+            }
+
+            .admin-table,
+            .admin-table tbody,
+            .admin-table tr,
+            .admin-table td {
+                display: table;
+                width: 100%;
+            }
+
+            .admin-table tr {
+                display: table-row;
+                background: transparent;
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .admin-table th {
+                color: var(--text-muted);
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                padding: 0 15px 10px;
+                display: table-cell;
+            }
+
+            .admin-table td {
+                display: table-cell;
+                background: rgba(255, 255, 255, 0.6);
+                padding: 18px 15px;
+                border: 1px solid transparent !important;
+            }
+
+            .admin-table td::before {
+                display: none;
+            }
+
+            .admin-table tr td:first-child {
+                border-radius: 0 16px 16px 0;
+                border-right: 1px solid var(--border) !important;
+                border-top: 1px solid var(--border) !important;
+                border-bottom: 1px solid var(--border) !important;
+            }
+
+            .admin-table tr td:last-child {
+                border-radius: 16px 0 0 16px;
+                border-left: 1px solid var(--border) !important;
+                border-top: 1px solid var(--border) !important;
+                border-bottom: 1px solid var(--border) !important;
+            }
+
+            .admin-table tr td:not(:first-child):not(:last-child) {
+                border-top: 1px solid var(--border) !important;
+                border-bottom: 1px solid var(--border) !important;
+            }
+
+            .admin-table tr:hover td {
+                background: #ffffff;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        /* ==========================================================================
+           DESKTOP (1025px+)
+           ========================================================================== */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 1000px;
+            }
+
+            .bg-shape {
+                opacity: 0.8;
+            }
+
+            .shape-1 {
+                width: 400px;
+                height: 400px;
+            }
+
+            .shape-2 {
+                width: 300px;
+                height: 300px;
+            }
+
+            /* Hover effects only on non-touch devices */
+            .result-item:hover {
+                transform: translateY(-3px) scale(1.01);
+                background: #ffffff;
+                box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
+                border-color: #fff;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Shapes for Glassmorphism -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div id="login-screen"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; overflow-y:auto; z-index:200; display:flex; flex-direction:column; justify-content:flex-start; align-items:center; gap:clamp(15px, 4vw, 20px); text-align:center; padding: clamp(30px, 8vh, 60px) 20px 40px;">
+        <div class="logo-box" style="width:clamp(60px, 15vw, 80px); height:clamp(60px, 15vw, 80px); font-size:clamp(1.5rem, 5vw, 2rem); margin-bottom: 10px;">R</div>
+        <h1 style="font-weight:800; color:var(--text-main); font-size: clamp(1.6rem, 7vw, 2.5rem);">نظام الأسعار الموحد</h1>
+        <p style="color:var(--text-muted); max-width:300px; margin-bottom: clamp(10px, 3vw, 20px); font-weight: 600; font-size: clamp(0.9rem, 3.5vw, 1rem);">أدخل بيانات الاعتماد للوصول إلى قاعدة البيانات</p>
+
+        <div class="login-card">
+            <div class="form-group" style="text-align: right; margin-bottom: 0;">
+                <label>اسم المستخدم</label>
+                <input type="text" id="login-email" placeholder="admin">
+            </div>
+            <div class="form-group" style="text-align: right; margin-bottom: 0;">
+                <label>كلمة المرور</label>
+                <input type="password" id="login-password" placeholder="••••••••">
+            </div>
+            <button id="login-btn" class="btn btn-primary"
+                style="width: 100%; justify-content: center; padding: 15px; margin-top: 10px; font-size: 1.1rem;">
+                تسجيل الدخول
+            </button>
+            <div id="login-error" style="color: var(--error); font-size: 0.9rem; display: none; font-weight: 700;">
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="main-container" style="display:none;">
+        <!-- Unified Top Navigation -->
+        <div class="main-top-nav">
+            <div class="header-title">
+                <div class="logo-box">R</div>
+                <header>
+                    <h1 class="nav-brand-title" style="display:none;">رواء للأسعار</h1>
+                </header>
+            </div>
+
+            <div class="page-nav-inline">
+                <a href="#home" class="nav-item active" id="nav-home">الرئيسية</a>
+                <a href="#upload" class="nav-item" id="nav-upload" style="display:none;">رفع البيانات</a>
+                <a href="#users" class="nav-item" id="nav-users" style="display:none;">المستخدمين</a>
+            </div>
+
+            <div id="current-user-display" class="user-toggle" onclick="handleLogout()">
+                <span id="active-username" style="display:none;">جاري التحميل...</span>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                    </path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <!-- Home Page (Search) -->
+            <div id="home" class="page active">
+                <div class="status-and-shop-row">
+                    <div id="status-banner" class="inline-status">
+                        <span>تحميل الحالة...</span>
+                    </div>
+
+                    <select id="home-shop-select" class="inline-shop-select">
+                        <option value="rawa">متجر رواء</option>
+                        <option value="zero">متجر زيرو</option>
+                        <option value="dribe">متجر درايب</option>
+                    </select>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="اكتب اسم المنتج للبحث..." autocomplete="off">
+                    <button id="clear-btn" class="clear-btn">✕</button>
+                </div>
+
+                <div id="results-list" class="results-list"></div>
+                <div id="no-results" class="no-results">عذراً، المنتج غير موجود في هذا المتجر</div>
+            </div>
+
+            <!-- Upload Page -->
+            <div id="upload" class="page">
+                <div class="form-group">
+                    <label>اختر المتجر لتحديث أسعاره</label>
+                    <select id="upload-shop-select" class="shop-select" style="width: 100%;">
+                        <option value="rawa">متجر رواء</option>
+                        <option value="zero">متجر زيرو</option>
+                        <option value="dribe">متجر درايب</option>
+                    </select>
+                </div>
+
+                <div class="upload-card">
+                    <label for="file-input" class="btn btn-primary" style="margin-bottom: 15px;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        رفع ملف Excel (xlsx/xls)
+                    </label>
+                    <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
+                    <div id="upload-status" class="status-msg">يرجى التأكد من وجود أعمدة "name" و "price"</div>
+                    <div id="upload-progress"
+                        style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; margin-top:15px; display:none;">
+                        <div id="progress-bar"
+                            style="width:0%; height:100%; background:var(--primary); border-radius:4px; transition:width 0.3s;">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="last-uploads-list" style="margin-top: 30px;">
+                    <!-- List of last uploads -->
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="users" class="page">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="showUserModal()">إضافة مستخدم جديد</button>
+                    <h2 style="font-size: 1.2rem; font-weight: 700;">إدارة الصلاحيات</h2>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>المستخدم</th>
+                            <th>المتاجر المتاحة</th>
+                            <th>رفع الملفات</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- User rows will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            <span>made by ahmed alnjjar</span>
+            <span id="footer-status">متصل بقاعدة البيانات</span>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title" style="margin-bottom: 20px; text-align: right;">إضافة مستخدم</h3>
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="modal-username"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+            </div>
+            <div class="form-group">
+                <label>البريد الإلكتروني (Identifier)</label>
+                <input type="email" id="modal-email" placeholder="example@domain.com"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+            </div>
+            <div class="form-group" id="modal-password-group">
+                <label>كلمة المرور المؤقتة</label>
+                <input type="password" id="modal-password" placeholder="أدخل كلمة مرور قوية..."
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+            </div>
+            <div class="form-group">
+                <label>الصلاحيات</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" id="perm-upload"> إمكانية رفع الملفات</label>
+                    <label class="checkbox-item"><input type="checkbox" id="perm-admin"> مسؤول نظام (Admin)</label>
+                    <div
+                        style="grid-column: 1 / -1; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; color: var(--primary);">
+                        متاجر للعرض فقط</div>
+                    <label class="checkbox-item"><input type="checkbox" value="rawa" class="perm-store"> متجر
+                        رواء</label>
+                    <label class="checkbox-item"><input type="checkbox" value="zero" class="perm-store"> متجر
+                        زيرو</label>
+                    <label class="checkbox-item"><input type="checkbox" value="dribe" class="perm-store"> متجر
+                        درايب</label>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeUserModal()">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveUser()">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from "./utils/supabase.ts";
+
+        const STORES = {
+            rawa: "متجر رواء",
+            zero: "متجر زيرو",
+            dribe: "متجر درايب"
+        };
+
+        let activeUser = null;
+        let storePricesCache = {};
+
+        // Global function for logout
+        window.handleLogout = async () => {
+            localStorage.removeItem('activeUser');
+            activeUser = null;
+            loginScreen.style.display = 'flex';
+            mainContainer.style.display = 'none';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'تسجيل الدخول';
+            loginEmailInput.value = '';
+            loginPasswordInput.value = '';
+        };
+
+        // UI Elements
+        const loginScreen = document.getElementById('login-screen');
+        const mainContainer = document.getElementById('main-container');
+        const activeUsernameDisplay = document.getElementById('active-username');
+        const loginBtn = document.getElementById('login-btn');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const loginError = document.getElementById('login-error');
+
+        const navUpload = document.getElementById('nav-upload');
+        const navUsers = document.getElementById('nav-users');
+
+        /**
+         * Auth State & Login
+         */
+        loginBtn.onclick = async () => {
+            const username = loginEmailInput.value.trim();
+            const password = loginPasswordInput.value;
+
+            if (!username || !password) return alert('يرجى إدخال اسم المستخدم وكلمة المرور');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'جاري تسجيل الدخول...';
+            loginError.style.display = 'none';
+
+            const { data: profile, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .single();
+
+            if (error || !profile) {
+                loginError.textContent = 'خطأ: بيانات الاعتماد غير صحيحة';
+                loginError.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'تسجيل الدخول';
+            } else {
+                activeUser = profile;
+                localStorage.setItem('activeUser', JSON.stringify(profile));
+                updateUIForUser();
+                loginScreen.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                navigate();
+            }
+        };
+
+        // Check local storage for active session on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('activeUser');
+            if (savedUser) {
+                activeUser = JSON.parse(savedUser);
+                updateUIForUser();
+                loginScreen.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                navigate();
+            }
+        });
+
+        function updateUIForUser() {
+            activeUsernameDisplay.textContent = activeUser.username + (activeUser.admin ? ' (مسؤول)' : '');
+            activeUsernameDisplay.parentNode.title = "اضغط لنسخ معرف المستخدم (ID)";
+            activeUsernameDisplay.onclick = (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(activeUser.id);
+                alert('تم نسخ معرف المستخدم (ID) بنجاح');
+            };
+            navUpload.style.display = activeUser.permissions.canUpload ? 'block' : 'none';
+            navUsers.style.display = activeUser.admin ? 'block' : 'none';
+        }
+
+        /**
+         * Routing & Initialization
+         */
+        function navigate() {
+            if (!activeUser) return;
+            const hash = window.location.hash || '#home';
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            const targetPage = document.querySelector(hash);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                const navItem = document.getElementById('nav-' + hash.substring(1));
+                if (navItem) navItem.classList.add('active');
+            }
+
+            if (hash === '#users') renderUsersTable();
+            if (hash === '#upload') renderUploadHistory();
+            if (hash === '#home') updateHomeStatus();
+        }
+
+        window.onhashchange = navigate;
+
+        /**
+         * User Management (Admin Only)
+         */
+        async function renderUsersTable() {
+            if (!activeUser?.admin) return;
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">جاري تحميل قائمة المستخدمين...</td></tr>';
+
+            const { data: usersList, error } = await supabase.from('users').select('*');
+
+            if (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--error)">فشل تحميل البيانات</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            usersList.forEach((u) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="المستخدم" style="font-weight:700">${u.username} ${u.admin ? '<span style="color:var(--primary); font-size:0.7rem">(مسؤول)</span>' : ''}</td>
+                    <td data-label="المتاجر المتاحة">${u.permissions.stores.map(s => STORES[s]).join(', ') || 'لا يوجد'}</td>
+                    <td data-label="رفع الملفات">${u.permissions.canUpload ? '✅' : '❌'}</td>
+                    <td data-label="إجراءات">
+                        <button class="btn btn-outline edit-user-btn" data-id="${u.id}">تعديل</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                btn.onclick = () => editUser(btn.dataset.id);
+            });
+        }
+
+        window.showUserModal = () => {
+            document.getElementById('modal-title').textContent = 'إضافة مستخدم';
+            document.getElementById('modal-username').value = '';
+
+            const emailGroup = document.getElementById('modal-email').closest('.form-group');
+            if (emailGroup) emailGroup.style.display = 'none';
+
+            document.getElementById('modal-password').value = '';
+            document.getElementById('modal-password').placeholder = '••••••••';
+            document.getElementById('modal-password-group').style.display = 'block';
+            document.getElementById('perm-upload').checked = false;
+            document.getElementById('perm-admin').checked = false;
+            document.querySelectorAll('.perm-store').forEach(cb => cb.checked = false);
+            document.getElementById('user-modal').style.display = 'flex';
+        }
+
+        window.closeUserModal = () => document.getElementById('user-modal').style.display = 'none';
+
+        window.saveUser = async () => {
+            const username = document.getElementById('modal-username').value.trim();
+            const password = document.getElementById('modal-password').value;
+
+            if (!username) return alert('يرجى إدخال اسم المستخدم');
+
+            const permissions = {
+                canUpload: document.getElementById('perm-upload').checked,
+                stores: Array.from(document.querySelectorAll('.perm-store:checked')).map(cb => cb.value)
+            };
+            const isAdmin = document.getElementById('perm-admin').checked;
+
+            const isEdit = document.getElementById('modal-title').textContent === 'تعديل مستخدم';
+
+            if (isEdit) {
+                // Update profile only
+                const updateData = { permissions, admin: isAdmin };
+                if (password) updateData.password = password; // Only update password if not empty
+
+                const { error } = await supabase
+                    .from('users')
+                    .update(updateData)
+                    .eq('username', username);
+
+                if (error) alert('Error: ' + error.message);
+                else {
+                    renderUsersTable();
+                    closeUserModal();
+                }
+            } else {
+                if (!password) return alert('يرجى إدخال كلمة المرور');
+
+                // Create user directly in public.users
+                const { error } = await supabase.from('users').insert([{
+                    username,
+                    password,
+                    permissions,
+                    admin: isAdmin
+                }]);
+                if (error) alert('Error creating user: ' + error.message);
+                else {
+                    renderUsersTable();
+                    closeUserModal();
+                }
+            }
+        }
+
+        async function editUser(id) {
+            const { data: u, error } = await supabase.from('users').select('*').eq('id', id).single();
+            if (error || !u) return;
+
+            document.getElementById('modal-title').textContent = 'تعديل مستخدم';
+            document.getElementById('modal-username').value = u.username;
+            const emailGroup = document.getElementById('modal-email').closest('.form-group');
+            if (emailGroup) emailGroup.style.display = 'none';
+            document.getElementById('modal-password-group').style.display = 'block';
+            document.getElementById('modal-password').value = '';
+            document.getElementById('modal-password').placeholder = 'اتركه فارغاً لعدم التغيير';
+            document.getElementById('perm-upload').checked = u.permissions.canUpload;
+            document.getElementById('perm-admin').checked = u.admin;
+            document.querySelectorAll('.perm-store').forEach(cb => {
+                cb.checked = u.permissions.stores.includes(cb.value);
+            });
+            document.getElementById('user-modal').style.display = 'flex';
+        }
+
+        /**
+         * Upload Functionality
+         */
+        const fileInput = document.getElementById('file-input');
+        const uploadStatus = document.getElementById('upload-status');
+        const uploadProgressBar = document.getElementById('progress-bar');
+        const uploadProgressContainer = document.getElementById('upload-progress');
+        const uploadShopSelect = document.getElementById('upload-shop-select');
+
+        fileInput.addEventListener('change', async (e) => {
+            if (!activeUser?.permissions.canUpload) return alert('ليس لديك صلاحية الرفع');
+
+            const file = e.target.files[0];
+            const targetStore = uploadShopSelect.value;
+            if (!file) return;
+
+            uploadStatus.innerHTML = '<span class="loading-pulse">جاري معالجة الملف...</span>';
+            const reader = new FileReader();
+
+            reader.onload = async (event) => {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet);
+
+                    if (json.length === 0) throw new Error('الملف فارغ');
+
+                    const nameKey = Object.keys(json[0]).find(k => k.trim().toLowerCase() === 'name' || k.trim() === 'الاسم');
+                    const priceKey = Object.keys(json[0]).find(k => k.trim().toLowerCase() === 'price' || k.trim() === 'السعر');
+                    if (!nameKey || !priceKey) throw new Error('يرجى التأكد من تسمية الأعمدة بـ name و price');
+
+                    uploadStatus.innerHTML = `<span class="loading-pulse">جاري تحديث السحابة...</span>`;
+                    uploadProgressContainer.style.display = 'block';
+
+                    // Supabase Delete and Insert
+                    const { error: delErr } = await supabase.from('products').delete().eq('store_id', targetStore);
+                    if (delErr) throw delErr;
+
+                    const products = json.map(item => ({
+                        store_id: targetStore,
+                        name: String(item[nameKey]).trim(),
+                        price: parseFloat(item[priceKey]) || 0
+                    }));
+
+                    // Insert in chunks of 1000
+                    for (let i = 0; i < products.length; i += 1000) {
+                        const chunk = products.slice(i, i + 1000);
+                        const { error: insErr } = await supabase.from('products').insert(chunk);
+                        if (insErr) throw insErr;
+                        uploadProgressBar.style.width = Math.min(100, Math.round(((i + chunk.length) / products.length) * 100)) + '%';
+                    }
+
+                    // Update store status
+                    const { error: statusErr } = await supabase.from('stores').upsert({
+                        id: targetStore,
+                        last_upload_time: new Date().toLocaleString('ar-EG'),
+                        count: json.length
+                    });
+                    if (statusErr) throw statusErr;
+
+                    uploadStatus.innerHTML = `<span class="success">✅ تم الرفع بنجاح لـ ${STORES[targetStore]}</span>`;
+                    uploadProgressContainer.style.display = 'none';
+                    renderUploadHistory();
+                } catch (err) {
+                    console.error(err);
+                    uploadStatus.innerHTML = `<span class="error">❌ ${err.message}</span>`;
+                    uploadProgressContainer.style.display = 'none';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        async function renderUploadHistory() {
+            const list = document.getElementById('last-uploads-list');
+            list.innerHTML = '<h3 style="margin-bottom:15px; font-size:1rem;">سجل التحديثات الأخير (Supabase)</h3>';
+
+            const { data: storesList } = await supabase.from('stores').select('*');
+
+            Object.keys(STORES).forEach(sid => {
+                const up = storesList?.find(s => s.id === sid);
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.style.marginBottom = '10px';
+                div.innerHTML = `
+                    <div class="product-info">
+                        <span class="price-label">${STORES[sid]}</span>
+                        <div style="font-size:0.9rem; margin-top:5px;">${up ? `آخر تحديث: ${up.last_upload_time}` : 'لم يتم الرفع مسبقاً'}</div>
+                    </div>
+                    <div style="text-align:left">
+                        <div style="font-weight:700; color:var(--primary); font-size:1.2rem;">${up ? up.count : 0}</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted)">منتج</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        /**
+         * Search
+         */
+        const statusBanner = document.getElementById('status-banner');
+        const homeShopSelect = document.getElementById('home-shop-select');
+        const searchInput = document.getElementById('search-input');
+        const resultsList = document.getElementById('results-list');
+        const noResults = document.getElementById('no-results');
+        const clearBtn = document.getElementById('clear-btn');
+
+        async function updateHomeStatus() {
+            if (!activeUser) return;
+            const storeId = homeShopSelect.value;
+
+            const { data: storeInfo } = await supabase.from('stores').select('*').eq('id', storeId).single();
+            const up = storeInfo;
+
+            if (up) {
+                statusBanner.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:var(--success); font-size:1.2rem;">●</span>
+                        <span style="color:var(--text-main); font-weight:800;">متصل بـ ${STORES[storeId]}</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted); background:rgba(79, 70, 229, 0.1); padding:2px 8px; border-radius:10px; margin-right:5px;">${up.count} منتج</span>
+                    </div>
+                    <span class="time">تحديث: ${up.last_upload_time}</span>
+                `;
+            } else {
+                statusBanner.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:var(--error); font-size:1.2rem;">●</span>
+                        <span style="color:var(--text-main); font-weight:800;">لا توجد بيانات لـ ${STORES[storeId]}</span>
+                    </div>
+                    <span class="time" style="background:#fee2e2; color:#b91c1c;">يرجى رفع ملف الأسعار</span>
+                `;
+            }
+
+            const hasAccess = activeUser.permissions.stores.includes(storeId) || activeUser.admin;
+            if (!hasAccess) {
+                statusBanner.innerHTML = `<span style="color:var(--error)">⚠️ ليس لديك صلاحية عرض أسعار ${STORES[storeId]}</span>`;
+                statusBanner.style.borderTopColor = 'var(--error)';
+                searchInput.disabled = true;
+                resultsList.innerHTML = '';
+            } else {
+                searchInput.disabled = false;
+                await loadStoreToCache(storeId);
+            }
+        }
+
+        async function loadStoreToCache(storeId) {
+            resultsList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary)">جاري مزامنة البيانات...</div>';
+            const { data, error } = await supabase.from('products').select('*').eq('store_id', storeId).limit(5000);
+            if (!error) {
+                storePricesCache[storeId] = data;
+                resultsList.innerHTML = '';
+            }
+        }
+
+        homeShopSelect.onchange = async () => {
+            await updateHomeStatus();
+            clearSearch();
+        };
+
+        searchInput.oninput = (e) => {
+            const val = e.target.value.trim().toLowerCase();
+            const store = homeShopSelect.value;
+            if (val.length < 2) {
+                resultsList.innerHTML = '';
+                clearBtn.style.display = 'none';
+                noResults.style.display = 'none';
+                return;
+            }
+
+            clearBtn.style.display = 'flex';
+
+            const matches = (storePricesCache[store] || []).filter(p =>
+                p.name.toLowerCase().includes(val)
+            ).slice(0, 50);
+
+            if (matches.length > 0) {
+                renderResults(matches);
+                noResults.style.display = 'none';
+            } else {
+                resultsList.innerHTML = '';
+                noResults.style.display = 'block';
+            }
+        };
+
+        function renderResults(products) {
+            resultsList.innerHTML = '';
+            products.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                    </div>
+                    <div class="product-price">
+                        <span class="currency">ر.س</span>${p.price.toLocaleString()}
+                    </div>
+                `;
+                resultsList.appendChild(div);
+            });
+        }
+
+        function clearSearch() {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            resultsList.innerHTML = '';
+            noResults.style.display = 'none';
+        }
+
+        clearBtn.onclick = clearSearch;
+        navigate();
+    </script>
+</body>
+
+</html>
