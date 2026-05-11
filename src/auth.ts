@@ -81,12 +81,7 @@ export function updateUIForUser() {
 
     if (activeUsernameDisplay) {
         activeUsernameDisplay.textContent = activeUser.username + (activeUser.admin ? ' (مسؤول)' : '');
-        activeUsernameDisplay.parentElement!.title = "اضغط لنسخ معرف المستخدم (ID)";
-        activeUsernameDisplay.parentElement!.onclick = (e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(activeUser.id);
-            showToast('تم نسخ معرف المستخدم (ID) بنجاح', 'success');
-        };
+        activeUsernameDisplay.parentElement!.title = "تسجيل الخروج";
     }
 
     if (navUpload) navUpload.style.display = activeUser.permissions.canUpload ? 'block' : 'none';
