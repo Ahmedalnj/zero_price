@@ -161,22 +161,8 @@
                     <h2 style="font-size: 1.2rem; font-weight: 700;">إدارة الصلاحيات</h2>
                 </div>
 
-                <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm mt-4">
-                    <div class="w-full overflow-x-auto">
-                        <table class="w-full text-right whitespace-nowrap min-w-[600px]">
-                            <thead>
-                                <tr class="bg-indigo-50/50 border-b border-[var(--border)]">
-                                    <th class="py-4 px-5 text-slate-500 font-black">المستخدم</th>
-                                    <th class="py-4 px-5 text-slate-500 font-black">المتاجر المتاحة</th>
-                                    <th class="py-4 px-5 text-slate-500 font-black">رفع الملفات</th>
-                                    <th class="py-4 px-5 text-slate-500 font-black text-left">إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-table-body" class="bg-white/50">
-                                <!-- User rows will be injected here -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div id="users-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4 w-full">
+                    <!-- User cards will be injected here -->
                 </div>
             </div>
         </div>

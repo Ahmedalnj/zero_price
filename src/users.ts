@@ -4,34 +4,54 @@ import { showToast } from './ui.ts';
 
 export async function renderUsersTable() {
     if (!activeUser?.admin) return;
-    const tbody = document.getElementById('users-table-body');
-    if (!tbody) return;
+    const grid = document.getElementById('users-grid');
+    if (!grid) return;
 
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center" class="py-4 text-indigo-500 font-bold animate-pulse">جاري تحميل قائمة المستخدمين...</td></tr>';
+    grid.innerHTML = '<div class="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-10 text-indigo-500 font-bold animate-pulse text-lg">جاري تحميل قائمة المستخدمين...</div>';
 
     const { data: usersList, error } = await supabase.from('users').select('*');
 
     if (error) {
         console.error(error);
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center" class="py-4 text-rose-500 font-bold">فشل تحميل البيانات</td></tr>';
+        grid.innerHTML = '<div class="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-10 text-rose-500 font-bold text-lg">فشل تحميل البيانات</div>';
         showToast('فشل تحميل قائمة المستخدمين', 'error');
         return;
     }
 
-    tbody.innerHTML = '';
+    grid.innerHTML = '';
     usersList.forEach((u) => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b border-slate-100 last:border-none';
-        tr.innerHTML = `
-            <td data-label="المستخدم" class="py-3 px-4 font-bold text-slate-800">${u.username} ${u.admin ? '<span class="text-indigo-500 text-[0.75rem] mr-2 bg-indigo-50 px-2 py-0.5 rounded-full">(مسؤول)</span>' : ''}</td>
-            <td data-label="المتاجر المتاحة" class="py-3 px-4 text-slate-600">${u.permissions.stores.map((s: string) => STORES[s]).join('، ') || 'لا يوجد'}</td>
-            <td data-label="رفع الملفات" class="py-3 px-4">${u.permissions.canUpload ? '✅' : '❌'}</td>
-            <td data-label="إجراءات" class="py-3 px-4 text-left">
-                <button class="edit-user-btn bg-white border border-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition-all hover:bg-slate-50 active:scale-95 shadow-sm" data-id="${u.id}">تعديل</button>
-                <button class="delete-user-btn bg-rose-50 border border-rose-200 text-rose-600 font-bold px-4 py-2 rounded-xl transition-all hover:bg-rose-100 active:scale-95 shadow-sm mr-2" data-id="${u.id}">حذف</button>
-            </td>
+        const storesText = u.permissions.stores.map((s: string) => STORES[s]).join('، ') || 'لا يوجد';
+        const card = document.createElement('div');
+        card.className = 'flex flex-col bg-white/70 backdrop-blur-md border border-[var(--border)] rounded-2xl p-5 shadow-sm transition-all hover:bg-white hover:-translate-y-1 hover:shadow-md gap-4 relative overflow-hidden';
+        card.innerHTML = `
+            ${u.admin ? '<div class="absolute top-0 right-0 bg-indigo-500 text-white text-[0.7rem] font-bold px-3 py-1 rounded-bl-xl">مسؤول</div>' : ''}
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-xl shrink-0">
+                    ${u.username.charAt(0).toUpperCase()}
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-extrabold text-slate-800 text-lg">${u.username}</span>
+                    <span class="text-sm text-slate-500 font-semibold">${u.admin ? 'مسؤول النظام' : 'مستخدم عادي'}</span>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-2 mt-2 bg-slate-50/80 rounded-xl p-3 border border-slate-100">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500 font-bold">رفع الملفات:</span>
+                    <span class="font-bold ${u.permissions.canUpload ? 'text-emerald-500' : 'text-rose-400'}">${u.permissions.canUpload ? 'مسموح ✅' : 'غير مسموح ❌'}</span>
+                </div>
+                <div class="flex justify-between items-start text-sm">
+                    <span class="text-slate-500 font-bold shrink-0">المتاجر:</span>
+                    <span class="text-slate-700 font-semibold text-left leading-relaxed">${storesText}</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-auto pt-2">
+                <button class="edit-user-btn flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-2 rounded-xl transition-all hover:bg-slate-50 active:scale-95 shadow-sm" data-id="${u.id}">تعديل</button>
+                <button class="delete-user-btn flex-1 bg-rose-50 border border-rose-100 text-rose-600 font-bold py-2 rounded-xl transition-all hover:bg-rose-100 active:scale-95 shadow-sm" data-id="${u.id}">حذف</button>
+            </div>
         `;
-        tbody.appendChild(tr);
+        grid.appendChild(card);
     });
 
     document.querySelectorAll('.edit-user-btn').forEach((btn: any) => {
