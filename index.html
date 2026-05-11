@@ -71,17 +71,43 @@
         <div class="flex-1 flex flex-col p-[clamp(20px,5vw,40px)] w-full max-w-7xl mx-auto">
             <!-- Home Page (Search) -->
             <div id="home" class="page active">
-                <div class="flex flex-row justify-between items-center bg-gradient-to-br from-white/90 to-white/60 border border-[var(--border)] rounded-[clamp(16px,4vw,24px)] p-[clamp(15px,3vw,20px)_clamp(20px,4vw,25px)] mb-[clamp(20px,5vw,32px)] shadow-[var(--shadow)] gap-4 flex-wrap">
-                    <div id="status-banner" class="flex flex-col gap-2 text-[clamp(0.9rem,2.5vw,1.1rem)] font-extrabold text-right flex-1">
-                        <span>تحميل الحالة...</span>
-                    </div>
+                <div class="flex flex-row justify-between items-center bg-gradient-to-br from-white/90 to-white/60 border border-[var(--border)] rounded-[clamp(16px,4vw,24px)] p-[clamp(15px,3vw,20px)_clamp(20px,4vw,25px)] mb-[clamp(24px,6vw,40px)] shadow-[var(--shadow)] gap-4 flex-wrap">
 
-                    <select id="home-shop-select" class="cursor-pointer appearance-none outline-none pl-[15px] pr-[35px] h-[52px] rounded-2xl border border-indigo-500/30 font-bold bg-indigo-500/5 text-indigo-600 flex items-center text-base min-w-[150px] shadow-sm transition-all touch-manipulation hover:bg-indigo-500/10 hover:border-indigo-600 active:scale-95" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%234f46e5\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: left 10px center; background-size: 16px;">
-                        <option value="rawa">متجر رواء</option>
-                        <option value="zero">متجر زيرو</option>
-                        <option value="dribe">متجر درايب</option>
-                    </select>
-                </div>
+    <!-- Right Side -->
+    <div class="flex flex-col gap-1 text-right">
+        
+
+        <div id="status-banner"
+            class="text-[clamp(0.82rem,2.5vw,0.95rem)] font-semibold text-slate-500">
+            تحميل الحالة...
+        </div>
+    </div>
+
+    <!-- Left Side -->
+    <div class="relative w-[170px] flex flex-col justify-center items-start">
+        <span class="text-[clamp(0.9rem,3vw,1rem)] font-black text-slate-500 mb-1 w-full text-right">متجرك الحالي</span>
+
+        <!-- Admin Select -->
+        <div id="home-shop-dropdown-wrapper" class="relative w-full">
+            <select id="home-shop-select" class="w-full h-[52px] rounded-2xl border border-indigo-200 bg-indigo-50/70 text-indigo-700 font-bold text-[16px] px-4 pl-10 outline-none appearance-none shadow-sm transition-all duration-300 hover:border-indigo-400 focus:ring-4 focus:ring-indigo-200">
+                <option value="rawa">متجر رواء</option>
+                <option value="zero">متجر زيرو</option>
+                <option value="dribe">متجر درايب</option>
+            </select>
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Normal User Text -->
+        <div id="home-shop-text-wrapper" class="hidden w-full text-right h-[52px] flex items-center pr-2">
+            <span id="current-store-name" class="text-[clamp(1.1rem,3vw,1.3rem)] font-black text-indigo-600">متجر رواء</span>
+        </div>
+    </div>
+
+</div>
 
                 <div class="relative mb-[clamp(24px,6vw,40px)] w-full flex items-center">
                     <input type="text" id="search-input" placeholder="اكتب اسم المنتج للبحث..." autocomplete="off" class="w-full h-[clamp(54px,6vh,64px)] px-6 pl-[55px] text-[max(16px,1.05rem)] border-2 border-white/80 rounded-2xl bg-white/60 text-[var(--text-main)] font-bold outline-none transition-all touch-manipulation focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-indigo-500/10 shadow-sm">
@@ -282,6 +308,28 @@
             };
             navUpload.style.display = activeUser.permissions.canUpload ? 'block' : 'none';
             navUsers.style.display = activeUser.admin ? 'block' : 'none';
+
+            // Store Selector Logic for Home Page
+            const dropdownWrapper = document.getElementById('home-shop-dropdown-wrapper');
+            const textWrapper = document.getElementById('home-shop-text-wrapper');
+            const storeNameDisplay = document.getElementById('current-store-name');
+            const shopSelect = document.getElementById('home-shop-select');
+
+            if (activeUser.admin) {
+                if (dropdownWrapper) dropdownWrapper.classList.remove('hidden');
+                if (textWrapper) textWrapper.classList.add('hidden');
+            } else {
+                if (dropdownWrapper) dropdownWrapper.classList.add('hidden');
+                if (textWrapper) textWrapper.classList.remove('hidden');
+                
+                // Set to the first store they have access to
+                const userStore = activeUser.permissions.stores && activeUser.permissions.stores.length > 0 
+                    ? activeUser.permissions.stores[0] 
+                    : 'rawa';
+                
+                if (shopSelect) shopSelect.value = userStore;
+                if (storeNameDisplay) storeNameDisplay.textContent = STORES[userStore] || 'غير محدد';
+            }
         }
 
         /**
