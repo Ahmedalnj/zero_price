@@ -3,6 +3,10 @@ import { handleLogin, handleLogout, checkSession } from './auth.ts';
 import { updateHomeStatus, handleSearchInput, clearSearch } from './search.ts';
 import { handleFileUpload, renderUploadHistory } from './upload.ts';
 import { renderUsersTable, showUserModal, closeUserModal, saveUser } from './users.ts';
+import { registerSW } from 'virtual:pwa-register';
+
+// Register Service Worker for PWA
+registerSW({ immediate: true });
 
 // Expose globals for any remaining inline onclicks in HTML
 (window as any).handleLogout = handleLogout;
@@ -57,4 +61,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Check existing session
     checkSession();
+
+    // Setup network status listeners
+    const offlineBanner = document.getElementById('offline-banner');
+    function updateNetworkStatus() {
+        if (navigator.onLine) {
+            if (offlineBanner) offlineBanner.style.display = 'none';
+        } else {
+            if (offlineBanner) offlineBanner.style.display = 'block';
+        }
+    }
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus(); // Initial check
 });

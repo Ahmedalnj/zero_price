@@ -15,8 +15,20 @@ export async function updateHomeStatus() {
     if (!statusBanner || !homeShopSelect || !searchInput || !resultsList) return;
 
     const storeId = homeShopSelect.value;
-    const { data: storeInfo } = await supabase.from('stores').select('*').eq('id', storeId).single();
-    const up = storeInfo;
+    
+    let up = null;
+    const cachedStoreInfo = localStorage.getItem('storeInfoCache_' + storeId);
+    if (cachedStoreInfo) {
+        try { up = JSON.parse(cachedStoreInfo); } catch (e) {}
+    }
+
+    if (navigator.onLine) {
+        const { data: storeInfo, error } = await supabase.from('stores').select('*').eq('id', storeId).single();
+        if (!error && storeInfo) {
+            up = storeInfo;
+            localStorage.setItem('storeInfoCache_' + storeId, JSON.stringify(storeInfo));
+        }
+    }
 
     if (up) {
         statusBanner.innerHTML = `
@@ -52,12 +64,23 @@ async function loadStoreToCache(storeId: string) {
     const resultsList = document.getElementById('results-list');
     if (!resultsList) return;
     
-    resultsList.innerHTML = getSkeletonHTML(4);
+    const cachedData = localStorage.getItem('storePricesCache_' + storeId);
+    if (cachedData) {
+        try {
+            storePricesCache[storeId] = JSON.parse(cachedData);
+            resultsList.innerHTML = '';
+        } catch (e) {}
+    } else {
+        resultsList.innerHTML = getSkeletonHTML(4);
+    }
     
-    const { data, error } = await supabase.from('products').select('*').eq('store_id', storeId).limit(5000);
-    if (!error && data) {
-        storePricesCache[storeId] = data;
-        resultsList.innerHTML = ''; 
+    if (navigator.onLine) {
+        const { data, error } = await supabase.from('products').select('*').eq('store_id', storeId).limit(5000);
+        if (!error && data) {
+            storePricesCache[storeId] = data;
+            localStorage.setItem('storePricesCache_' + storeId, JSON.stringify(data));
+            resultsList.innerHTML = ''; 
+        }
     }
 }
 
