@@ -3,214 +3,271 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رواء - مدقق الأسعار</title>
-    <!-- SheetJS CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>رواء - مدقق الأسعار الذكي</title>
+    
+    <!-- SheetJS -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/index.css">
     <meta name="theme-color" content="#4f46e5">
     <link rel="apple-touch-icon" href="/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
 </head>
 
 <body>
-    <!-- Offline Banner -->
-    <div id="offline-banner" class="fixed top-0 left-0 w-full bg-rose-500 text-white text-center py-2 font-bold z-[300] hidden shadow-md transition-all">
-        أنت في وضع عدم الاتصال. يتم عرض الأسعار المخزنة مؤقتاً.
-    </div>
-
-    <!-- Background Shapes for Glassmorphism -->
+    <!-- Background Elements -->
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
 
-    <div id="login-screen" class="fixed inset-0 w-full h-full overflow-y-auto z-[200] flex flex-col justify-start items-center gap-4 text-center px-5 pb-10 pt-8 sm:pt-12 md:gap-5">
-        <div class="logo-box mb-2 w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl">R</div>
-        <h1 class="font-extrabold text-[var(--text-main)] text-2xl sm:text-3xl md:text-4xl">نظام الأسعار الموحد</h1>
-        <p class="text-[var(--text-muted)] max-w-[300px] mb-3 sm:mb-5 font-semibold text-sm sm:text-base">أدخل بيانات الاعتماد للوصول إلى قاعدة البيانات</p>
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="fixed top-0 left-0 w-full bg-rose-600 text-white text-center py-2 font-bold z-[1000] hidden shadow-lg animate-fade-in">
+        أنت في وضع عدم الاتصال. يتم عرض البيانات المخزنة مؤقتاً.
+    </div>
 
-        <div class="login-card">
-            <div class="form-group text-right mb-0">
-                <label>اسم المستخدم</label>
-                <input type="text" id="login-email" placeholder="admin">
-            </div>
-            <div class="form-group text-right mb-0">
-                <label>كلمة المرور</label>
-                <input type="password" id="login-password" placeholder="••••••••">
-            </div>
-            <button id="login-btn" class="btn btn-primary w-full justify-center p-4 mt-3 text-lg">
-                تسجيل الدخول
-            </button>
-            <div id="login-error" class="hidden text-[var(--error)] text-sm font-bold mt-2">
+    <!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 z-[500] flex flex-col items-center justify-center p-6 bg-slate-50/50 backdrop-blur-xl">
+        <div class="w-20 h-20 bg-primary flex items-center justify-center rounded-2xl text-white font-black text-3xl shadow-xl mb-8 animate-slide-up">R</div>
+        <div class="glass-panel w-full max-w-md p-8 rounded-[2rem] animate-slide-up" style="animation-delay: 0.1s;">
+            <h1 class="text-2xl font-black text-slate-800 text-center mb-2">نظام الأسعار الموحد</h1>
+            <p class="text-slate-500 text-center font-bold text-sm mb-8">سجل الدخول للوصول إلى قاعدة البيانات</p>
+
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-extrabold text-slate-700 pr-1">اسم المستخدم</label>
+                    <input type="text" id="login-email" class="form-input" placeholder="أدخل اسم المستخدم">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-extrabold text-slate-700 pr-1">كلمة المرور</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••">
+                </div>
+                <button id="login-btn" class="btn btn-primary w-full h-14 mt-4 text-lg">
+                    تسجيل الدخول
+                </button>
+                <div id="login-error" class="hidden text-rose-500 text-sm font-bold text-center mt-2 animate-fade-in"></div>
             </div>
         </div>
     </div>
 
-    <div class="w-full min-h-screen bg-[var(--card-bg)] backdrop-blur-[16px] shadow-[var(--shadow)] flex flex-col border-none animate-[fadeIn_0.5s_ease-out]" id="main-container" style="display:none;">
-        <!-- Unified Top Navigation -->
-        <div class="sticky top-0 z-50 flex flex-col md:flex-row justify-between items-center bg-white/80 border-b border-[var(--border)] backdrop-blur-md px-4 py-3 md:px-10 md:py-4 gap-3 md:gap-6 shadow-sm">
-            
-            <div class="flex justify-between items-center w-full md:w-auto">
-                <div class="flex items-center gap-2.5 shrink-0">
-                    <div class="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-[var(--primary)] to-indigo-400 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shrink-0">R</div>
-                    <header>
-                        <h1 class="text-lg font-extrabold tracking-tight whitespace-nowrap block" style="display:none;">رواء للأسعار</h1>
-                    </header>
-                </div>
+    <!-- Main App Container -->
+    <div id="main-container" class="flex-1 flex flex-col min-h-screen" style="display:none;">
+        
+        <!-- Header Navigation -->
+        <header class="sticky top-0 z-[100] glass-panel border-b-0 border-x-0 rounded-none bg-white/80 backdrop-blur-md">
+            <div class="responsive-container h-20 flex items-center justify-between gap-4">
                 
-                <!-- Logout for mobile -->
-                <div id="current-user-display-mobile" class="flex md:hidden items-center gap-2 cursor-pointer px-3 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-rose-500 font-bold transition-all hover:bg-rose-100 active:scale-95" onclick="handleLogout()">
-                    <span class="text-sm">خروج</span>
-                </div>
-            </div>
-
-            <div class="flex gap-4 md:gap-8 w-full md:flex-1 justify-start md:justify-center overflow-x-auto whitespace-nowrap pb-1 md:pb-0 scrollbar-hide">
-                <a href="#home" class="nav-item active text-[0.95rem] md:text-base px-1" id="nav-home">الرئيسية</a>
-                <a href="#upload" class="nav-item text-[0.95rem] md:text-base px-1" id="nav-upload" style="display:none;">رفع البيانات</a>
-                <a href="#users" class="nav-item text-[0.95rem] md:text-base px-1" id="nav-users" style="display:none;">المستخدمين</a>
-            </div>
-
-            <!-- Logout for Desktop -->
-            <div id="current-user-display-desktop" class="hidden md:flex items-center gap-2 cursor-pointer px-4 py-2 rounded-xl bg-indigo-50/50 border border-[var(--border)] text-[0.9rem] font-bold transition-all hover:bg-white/90 active:scale-95" onclick="handleLogout()">
-                <span id="active-username" class="hidden md:inline" style="display:none;">جاري التحميل...</span>
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-indigo-600">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-            </div>
-        </div>
-
-        <div class="flex-1 flex flex-col p-4 sm:p-6 md:p-8 lg:p-10 w-full max-w-7xl mx-auto">
-            <!-- Home Page (Search) -->
-            <div id="home" class="page active">
-                <div class="flex flex-col md:flex-row justify-between items-center bg-gradient-to-br from-white/90 to-white/60 border border-[var(--border)] rounded-2xl md:rounded-3xl p-5 md:p-6 mb-6 md:mb-10 shadow-sm gap-4 w-full">
-
-    <!-- Right Side -->
-    <div class="flex flex-col gap-1 text-right w-full md:w-auto items-center md:items-start text-center md:text-right">
-        <div id="status-banner"
-            class="text-sm md:text-base font-semibold text-slate-500 w-full">
-            تحميل الحالة...
-        </div>
-    </div>
-
-    <!-- Left Side -->
-    <div class="relative w-full md:w-[220px] flex flex-col justify-center items-start mt-2 md:mt-0">
-        <span class="text-sm md:text-base font-black text-slate-500 mb-2 w-full text-center md:text-right">متجرك الحالي</span>
-
-        <!-- Admin Select -->
-        <div id="home-shop-dropdown-wrapper" class="relative w-full">
-            <select id="home-shop-select" class="w-full h-12 md:h-14 rounded-xl border border-indigo-200 bg-indigo-50/70 text-indigo-700 font-bold text-base md:text-lg px-4 pl-10 outline-none appearance-none shadow-sm transition-all duration-300 hover:border-indigo-400 focus:ring-4 focus:ring-indigo-200">
-                <option value="rawa">متجر رواء</option>
-                <option value="zero">متجر زيرو</option>
-                <option value="dribe">متجر درايب</option>
-            </select>
-            <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
-        </div>
-
-        <!-- Normal User Text -->
-        <div id="home-shop-text-wrapper" class="hidden w-full text-center md:text-right h-12 md:h-14 flex items-center justify-center md:justify-start pr-2 bg-indigo-50/30 rounded-xl border border-indigo-100">
-            <span id="current-store-name" class="text-lg md:text-xl font-black text-indigo-600">متجر رواء</span>
-        </div>
-    </div>
-
-</div>
-
-                <div class="relative mb-6 md:mb-10 w-full flex items-center shadow-sm rounded-2xl bg-white">
-                    <input type="text" id="search-input" placeholder="اكتب اسم المنتج للبحث..." autocomplete="off" class="w-full h-14 md:h-16 px-5 md:px-6 pl-14 text-base md:text-lg border-2 border-indigo-100 rounded-2xl bg-transparent text-[var(--text-main)] font-bold outline-none transition-all touch-manipulation focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-indigo-500/10 placeholder:text-slate-300">
-                    <button id="clear-btn" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border-none bg-red-50 text-red-500 text-lg hidden items-center justify-center cursor-pointer transition-all z-10 hover:bg-red-500 hover:text-white active:scale-95">✕</button>
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-xl text-white font-black text-lg shadow-lg">R</div>
+                    <span class="text-lg font-black text-slate-800 hidden sm:block">رواء للأسعار</span>
                 </div>
 
-                <div id="results-list" class="flex flex-col gap-4 md:gap-5 w-full"></div>
-                <div id="no-results" class="text-center p-6 text-rose-500 font-bold hidden bg-white/50 rounded-2xl border border-dashed border-rose-500 text-lg w-full">عذراً، المنتج غير موجود في هذا المتجر</div>
-            </div>
+                <!-- Navigation Tabs -->
+                <nav class="flex items-center gap-1 sm:gap-4 overflow-x-auto scrollbar-hide pb-0">
+                    <a href="#home" class="nav-item active" id="nav-home">الرئيسية</a>
+                    <a href="#upload" class="nav-item" id="nav-upload" style="display:none;">الرفع</a>
+                    <a href="#users" class="nav-item" id="nav-users" style="display:none;">المستخدمين</a>
+                </nav>
 
-            <!-- Upload Page -->
-            <div id="upload" class="page">
-                <div class="form-group text-right mb-[15px]">
-                    <label class="block mb-2 font-bold text-[0.95rem]">اختر المتجر لتحديث أسعاره</label>
-                    <select id="upload-shop-select" class="w-full h-[clamp(48px,6vh,60px)] px-5 text-[max(16px,1rem)] border-2 border-white/80 rounded-2xl font-inherit outline-none bg-white/60 text-[var(--text-main)] font-semibold transition-all appearance-none touch-manipulation focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-indigo-500/10">
-                        <option value="rawa">متجر رواء</option>
-                        <option value="zero">متجر زيرو</option>
-                        <option value="dribe">متجر درايب</option>
-                    </select>
+                <!-- Profile / Logout -->
+                <div class="flex items-center gap-3">
+                    <div id="current-user-display" class="flex items-center gap-2 cursor-pointer bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-all" onclick="handleLogout()">
+                        <span id="active-username" class="text-sm font-bold text-slate-700 hidden md:block">جاري التحميل...</span>
+                        <div class="w-8 h-8 bg-rose-100 flex items-center justify-center rounded-lg text-rose-600">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 py-8">
+            <div class="responsive-container">
+                
+                <!-- Home / Search Page -->
+                <div id="home" class="page active animate-fade-in">
+                    
+                    <!-- Store Selector Card -->
+                    <div class="glass-panel p-4 rounded-[2.5rem] mb-3 flex flex-col md:flex-row items-center justify-between gap-8 border-white">
+                        <div id="status-banner" class="flex flex-col gap-1 w-full md:w-auto">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-slate-300 animate-pulse"></div>
+                                <span class="font-bold text-slate-500">جاري تحميل الحالة...</span>
+                            </div>
+                        </div>
+
+                        <div class="relative w-full md:w-64">
+                            <label class="block text-xs font-black text-slate-400 mb-1.5 uppercase tracking-wider pr-1">المتجر الحالي</label>
+                            
+                            <div id="home-shop-dropdown-wrapper" class="relative">
+                                <select id="home-shop-select" class="form-input pr-4 pl-10 appearance-none bg-slate-50/50">
+                                    <option value="rawa">متجر رواء</option>
+                                    <option value="zero">متجر زيرو</option>
+                                    <option value="dribe">متجر دريبي</option>
+                                </select>
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3"></path></svg>
+                                </div>
+                            </div>
+
+                            <div id="home-shop-text-wrapper" class="hidden form-input flex items-center justify-start bg-primary/5 border-primary/20">
+                                <span id="current-store-name" class="text-primary font-black">متجر رواء</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative mb-12 group">
+                        <input type="text" id="search-input" placeholder="ابحث عن منتج..." autocomplete="off" 
+                            class="w-full h-16 sm:h-20 px-6 pl-16 text-lg sm:text-xl border-2 border-transparent bg-white shadow-lg rounded-2xl font-bold outline-none transition-all focus:ring-4 focus:ring-primary/10 focus:border-primary placeholder:text-slate-300">
+                        <div class="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                            <button id="clear-btn" class="w-10 h-10 rounded-full bg-rose-50 text-rose-500 hidden items-center justify-center transition-all hover:bg-rose-500 hover:text-white">✕</button>
+                            <div class="text-slate-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="results-list" class="grid grid-cols-1 gap-y-8 sm:gap-y-12"></div>
+                    <div id="no-results" class="hidden"></div>
                 </div>
 
-                <div class="bg-white/60 rounded-[20px] p-[30px_20px] border-2 border-dashed border-[var(--primary)] text-center">
-                    <label for="file-input" class="btn btn-primary inline-flex items-center justify-center min-h-[clamp(48px,6vh,60px)] px-6 rounded-2xl font-bold cursor-pointer border-none gap-2.5 text-[clamp(1rem,3vw,1.1rem)] transition-all touch-manipulation mb-[15px] active:scale-95 text-white bg-gradient-to-br from-[var(--primary)] to-indigo-500 shadow-[0_8px_15px_-5px_rgba(79,70,229,0.3)]">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                        </svg>
-                        رفع ملف Excel (xlsx/xls)
-                    </label>
-                    <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
-                    <div id="upload-status" class="status-msg text-sm font-bold text-[var(--text-muted)]">يرجى التأكد من وجود أعمدة "name" و "price"</div>
-                    <div id="upload-progress" class="w-full h-2 bg-slate-200 rounded mt-[15px] hidden">
-                        <div id="progress-bar" class="w-0 h-full bg-[var(--primary)] rounded transition-all duration-300"></div>
+                <!-- Upload Page -->
+                <div id="upload" class="page animate-fade-in">
+                    <div class="max-w-2xl mx-auto space-y-8">
+                        <div class="glass-panel p-8 rounded-3xl space-y-6">
+                            <h2 class="text-xl font-black text-slate-800">تحديث الأسعار</h2>
+                            
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-extrabold text-slate-700 pr-1">اختر المتجر المستهدف</label>
+                                <select id="upload-shop-select" class="form-input">
+                                    <option value="rawa">متجر رواء</option>
+                                    <option value="zero">متجر زيرو</option>
+                                    <option value="dribe">متجر دريبي</option>
+                                </select>
+                            </div>
+
+                            <div class="relative group">
+                                <label for="file-input" class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50 cursor-pointer transition-all hover:bg-white hover:border-primary group-hover:shadow-xl">
+                                    <div class="w-16 h-16 bg-primary/10 flex items-center justify-center rounded-2xl text-primary mb-4">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-width="2.5"></path></svg>
+                                    </div>
+                                    <span class="text-lg font-black text-slate-800">اضغط لرفع ملف Excel</span>
+                                    <span class="text-sm font-bold text-slate-400 mt-1">يجب أن يحتوي الملف على عمودي الاسم والسعر</span>
+                                </label>
+                                <input type="file" id="file-input" accept=".xlsx, .xls" class="hidden">
+                            </div>
+
+                            <div id="upload-status" class="text-center font-bold text-slate-500"></div>
+                            
+                            <div id="upload-progress" class="hidden">
+                                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="progress-bar" class="w-0 h-full bg-primary transition-all duration-300"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="last-uploads-list" class="space-y-4"></div>
                     </div>
                 </div>
 
-                <div id="last-uploads-list" style="margin-top: 30px;">
-                    <!-- List of last uploads -->
+                <!-- Users Page -->
+                <div id="users" class="page animate-fade-in">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800">إدارة المستخدمين</h2>
+                            <p class="text-slate-500 font-bold text-sm">تحكم في صلاحيات الوصول والمتاجر</p>
+                        </div>
+                        <button class="btn btn-primary h-12 shadow-lg" onclick="showUserModal()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="3"></path></svg>
+                            إضافة مستخدم جديد
+                        </button>
+                    </div>
+
+                    <div id="users-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 gap-y-12 md:gap-y-16"></div>
                 </div>
+
             </div>
+        </main>
 
-            <!-- Users Page -->
-            <div id="users" class="page">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <button class="btn btn-primary inline-flex items-center justify-center min-h-[clamp(48px,6vh,60px)] px-6 rounded-2xl font-bold cursor-pointer border-none gap-2.5 text-[clamp(1rem,3vw,1.1rem)] transition-all touch-manipulation active:scale-95 text-white bg-gradient-to-br from-[var(--primary)] to-indigo-500 shadow-[0_8px_15px_-5px_rgba(79,70,229,0.3)]" onclick="showUserModal()">إضافة مستخدم جديد</button>
-                    <h2 style="font-size: 1.2rem; font-weight: 700;">إدارة الصلاحيات</h2>
+        <!-- Footer -->
+        <footer class="py-6 border-t border-slate-200/50 glass-panel border-x-0 border-b-0 rounded-none bg-white/50">
+            <div class="responsive-container flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-bold text-slate-400">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <span id="footer-status">متصل بقاعدة البيانات</span>
                 </div>
-
-                <div id="users-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4 w-full">
-                    <!-- User cards will be injected here -->
-                </div>
+                <span>made by ahmed alnjjar &copy; 2026</span>
             </div>
-        </div>
-
-        <div class="flex justify-between items-center p-[15px_clamp(15px,4vw,30px)] bg-white/50 backdrop-blur-[5px] border-t border-[var(--border)] text-[clamp(0.8rem,2vw,0.9rem)] font-semibold text-[var(--text-muted)] mt-auto">
-            <span>made by ahmed alnjjar</span>
-            <span id="footer-status">متصل بقاعدة البيانات</span>
-        </div>
+        </footer>
     </div>
 
     <!-- User Modal -->
-    <div id="user-modal" class="fixed inset-0 w-full h-full bg-slate-900/40 backdrop-blur-md hidden justify-center items-center z-[100] p-2.5">
-        <div class="bg-white/95 p-[clamp(25px,5vw,40px)] rounded-[clamp(20px,5vw,30px)] w-full max-w-[500px] max-h-[95vh] overflow-y-auto">
-            <h3 id="modal-title" class="mb-5 text-right font-bold text-xl">إضافة مستخدم</h3>
+    <div id="user-modal" class="fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-panel w-full max-w-xl p-8 rounded-[2.5rem] bg-white animate-slide-up shadow-2xl">
+            <h3 id="modal-title" class="text-2xl font-black text-slate-800 mb-6">إضافة مستخدم</h3>
             
-            <div class="mb-[15px] text-right">
-                <label class="block mb-2 font-bold text-[0.95rem]">اسم المستخدم</label>
-                <input type="text" id="modal-username" class="w-full h-[clamp(48px,6vh,60px)] px-5 text-[max(16px,1rem)] border-2 border-white/80 rounded-2xl bg-white/60 text-[var(--text-main)] font-semibold outline-none transition-all focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-indigo-500/10 touch-manipulation">
-            </div>
-            <div class="mb-[15px] text-right">
-                <label class="block mb-2 font-bold text-[0.95rem]">البريد الإلكتروني (Identifier)</label>
-                <input type="email" id="modal-email" placeholder="example@domain.com" class="w-full h-[clamp(48px,6vh,60px)] px-5 text-[max(16px,1rem)] border-2 border-white/80 rounded-2xl bg-white/60 text-[var(--text-main)] font-semibold outline-none transition-all focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-indigo-500/10 touch-manipulation">
-            </div>
-            <div class="mb-[15px] text-right" id="modal-password-group">
-                <label class="block mb-2 font-bold text-[0.95rem]">كلمة المرور المؤقتة</label>
-                <input type="password" id="modal-password" placeholder="أدخل كلمة مرور قوية..." class="w-full h-[clamp(48px,6vh,60px)] px-5 text-[max(16px,1rem)] border-2 border-white/80 rounded-2xl bg-white/60 text-[var(--text-main)] font-semibold outline-none transition-all focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-indigo-500/10 touch-manipulation">
-            </div>
-            <div class="mb-[15px] text-right">
-                <label class="block mb-2 font-bold text-[0.95rem]">الصلاحيات</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2.5">
-                    <label class="flex items-center gap-2.5 text-[0.95rem] font-semibold min-h-[48px] touch-manipulation"><input type="checkbox" id="perm-upload" class="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"> إمكانية رفع الملفات</label>
-                    <label class="flex items-center gap-2.5 text-[0.95rem] font-semibold min-h-[48px] touch-manipulation"><input type="checkbox" id="perm-admin" class="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"> مسؤول نظام (Admin)</label>
-                    <div class="col-span-1 sm:col-span-2 mt-2.5 border-t border-[var(--border)] pt-2.5 text-[var(--primary)] font-bold">متاجر للعرض فقط</div>
-                    <label class="flex items-center gap-2.5 text-[0.95rem] font-semibold min-h-[48px] touch-manipulation"><input type="checkbox" value="rawa" class="perm-store w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"> متجر رواء</label>
-                    <label class="flex items-center gap-2.5 text-[0.95rem] font-semibold min-h-[48px] touch-manipulation"><input type="checkbox" value="zero" class="perm-store w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"> متجر زيرو</label>
-                    <label class="flex items-center gap-2.5 text-[0.95rem] font-semibold min-h-[48px] touch-manipulation"><input type="checkbox" value="dribe" class="perm-store w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"> متجر درايب</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-extrabold text-slate-700 pr-1">اسم المستخدم</label>
+                        <input type="text" id="modal-username" class="form-input" placeholder="JohnDoe">
+                    </div>
+                    <div id="modal-email-group" class="space-y-1.5">
+                        <label class="block text-sm font-extrabold text-slate-700 pr-1">البريد الإلكتروني</label>
+                        <input type="email" id="modal-email" class="form-input" placeholder="email@example.com">
+                    </div>
+                    <div id="modal-password-group" class="space-y-1.5">
+                        <label class="block text-sm font-extrabold text-slate-700 pr-1">كلمة المرور</label>
+                        <input type="password" id="modal-password" class="form-input" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block text-sm font-extrabold text-slate-700 pr-1">الصلاحيات والمتاجر</label>
+                    <div class="space-y-3 bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="perm-upload" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary">
+                            <span class="text-sm font-bold text-slate-600 group-hover:text-primary">إمكانية رفع الملفات</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="perm-admin" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary">
+                            <span class="text-sm font-bold text-slate-600 group-hover:text-primary">مسؤول نظام (Admin)</span>
+                        </label>
+                        
+                        <div class="pt-2 border-t border-slate-200">
+                            <span class="text-[0.7rem] font-black text-slate-400 uppercase tracking-widest mb-2 block">المتاجر المتاحة</span>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" value="rawa" class="perm-store w-4 h-4 rounded border-slate-300 text-primary">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-primary">متجر رواء</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" value="zero" class="perm-store w-4 h-4 rounded border-slate-300 text-primary">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-primary">متجر زيرو</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" value="dribe" class="perm-store w-4 h-4 rounded border-slate-300 text-primary">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-primary">متجرالدريبي</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-2.5 justify-end mt-5">
-                <button class="btn btn-outline inline-flex items-center justify-center min-h-[clamp(48px,6vh,60px)] px-6 rounded-2xl font-bold cursor-pointer text-[clamp(1rem,3vw,1.1rem)] transition-all touch-manipulation active:scale-95 bg-white/60 border border-[var(--border)] text-[var(--text-main)] hover:bg-white" onclick="closeUserModal()">إلغاء</button>
-                <button class="btn btn-primary inline-flex items-center justify-center min-h-[clamp(48px,6vh,60px)] px-6 rounded-2xl font-bold cursor-pointer border-none gap-2.5 text-[clamp(1rem,3vw,1.1rem)] transition-all touch-manipulation active:scale-95 text-white bg-gradient-to-br from-[var(--primary)] to-indigo-500 shadow-[0_8px_15px_-5px_rgba(79,70,229,0.3)]" onclick="saveUser()">حفظ</button>
+
+            <div class="flex items-center justify-end gap-3 mt-10">
+                <button class="btn btn-outline border-slate-200 text-slate-500" onclick="closeUserModal()">إلغاء</button>
+                <button class="btn btn-primary px-10" onclick="saveUser()">حفظ المستخدم</button>
             </div>
         </div>
     </div>

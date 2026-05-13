@@ -16,7 +16,7 @@ async function main() {
         await supabase.from('stores').insert([
             { id: 'rawa', name: 'متجر رواء' },
             { id: 'zero', name: 'متجر زيرو' },
-            { id: 'dribe', name: 'متجر درايب' }
+            { id: 'dribe', name: 'متجر دريبي' }
         ]);
         console.log('Done!');
     }

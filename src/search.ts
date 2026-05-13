@@ -32,26 +32,42 @@ export async function updateHomeStatus() {
 
     if (up) {
         statusBanner.innerHTML = `
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span class="text-emerald-500 text-[1.2rem]">●</span>
-                <span class="text-slate-800 font-extrabold">متصل بـ ${STORES[storeId]}</span>
-                <span class="text-[0.8rem] text-slate-500 bg-indigo-500/10 px-2 py-0.5 rounded-[10px] mr-1">${up.count} منتج</span>
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <span class="flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-slate-800 font-black text-sm">متصل بـ ${STORES[storeId]}</span>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[0.7rem] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">تحديث: ${up.last_upload_time}</span>
+                        <span class="text-[0.7rem] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">${up.count.toLocaleString()} منتج</span>
+                    </div>
+                </div>
             </div>
-            <span class="text-[0.85rem] text-slate-400 mt-1 block">تحديث: ${up.last_upload_time}</span>
         `;
     } else {
         statusBanner.innerHTML = `
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span class="text-rose-500 text-[1.2rem]">●</span>
-                <span class="text-slate-800 font-extrabold">لا توجد بيانات لـ ${STORES[storeId]}</span>
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                <div class="flex flex-col">
+                    <span class="text-slate-800 font-black text-sm">لا توجد بيانات لـ ${STORES[storeId]}</span>
+                    <span class="text-[0.7rem] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-lg mt-0.5">يرجى رفع ملف الأسعار</span>
+                </div>
             </div>
-            <span class="text-[0.85rem] text-rose-500 bg-rose-50 px-2 py-0.5 rounded-[10px] mt-1 inline-block">يرجى رفع ملف الأسعار</span>
         `;
     }
 
     const hasAccess = activeUser.permissions.stores.includes(storeId) || activeUser.admin;
     if (!hasAccess) {
-        statusBanner.innerHTML = `<span class="text-rose-500 font-bold">⚠️ ليس لديك صلاحية عرض أسعار ${STORES[storeId]}</span>`;
+        statusBanner.innerHTML = `
+            <div class="flex items-center gap-3 bg-rose-50 border border-rose-100 p-3 rounded-2xl w-full">
+                <span class="text-xl">⚠️</span>
+                <span class="text-rose-600 font-black text-sm">ليس لديك صلاحية عرض أسعار ${STORES[storeId]}</span>
+            </div>
+        `;
         searchInput.disabled = true;
         resultsList.innerHTML = '';
     } else {
@@ -114,23 +130,28 @@ export function handleSearchInput(e: Event) {
         noResults.style.display = 'none';
     } else {
         resultsList.innerHTML = '';
-        noResults.innerHTML = getEmptyStateHTML('عذراً، المنتج غير موجود في هذا المتجر');
+        noResults.innerHTML = getEmptyStateHTML('جرب البحث بكلمات أخرى أو تأكد من اسم المنتج');
         noResults.style.display = 'block';
     }
 }
 
 function renderResults(products: any[], container: HTMLElement) {
     container.innerHTML = '';
-    products.forEach(p => {
+    products.forEach((p, index) => {
         const div = document.createElement('div');
-        div.className = 'flex flex-row justify-between items-center bg-white/60 backdrop-blur-md rounded-[clamp(12px,4vw,20px)] p-[clamp(15px,4vw,20px)] border border-white shadow-[0_4px_15px_rgb(0,0,0,0.03)] gap-[15px] transition-all hover:bg-white hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgb(0,0,0,0.06)] active:scale-[0.98]';
+        div.className = 'glass-panel rounded-[1.5rem] p-6 sm:p-8 flex flex-row justify-between items-center gap-6 sm:gap-10 animate-slide-up hover-lift cursor-pointer border-white/60 bg-white/40';
+        div.style.animationDelay = `${index * 0.05}s`;
+        
         div.innerHTML = `
-            <div class="flex flex-col gap-1.5 flex-1 text-right">
-                <div class="text-[clamp(1.1rem,4vw,1.3rem)] font-extrabold text-slate-800 leading-tight">${p.name}</div>
+            <div class="flex flex-col gap-1 flex-1 text-right">
+                <div class="text-sm font-black text-slate-400 uppercase tracking-widest mb-0.5">المنتج</div>
+                <div class="text-[clamp(1.1rem,3vw,1.25rem)] font-black text-slate-800 leading-tight">${p.name}</div>
             </div>
             <div class="flex flex-col items-end gap-1 min-w-fit">
-                <div class="text-[clamp(1.2rem,4.5vw,1.5rem)] font-black text-indigo-600 bg-indigo-50/50 px-3 py-1 rounded-xl whitespace-nowrap">
-                    <span class="text-[0.7rem] ml-1 text-indigo-400 font-bold uppercase tracking-wider">د.ل</span>${p.price.toLocaleString()}
+                <div class="text-sm font-black text-slate-400 uppercase tracking-widest mb-0.5">السعر</div>
+                <div class="flex items-baseline gap-1.5 bg-primary/10 px-4 py-2 rounded-2xl">
+                    <span class="text-[0.8rem] font-black text-primary/70">د.ل</span>
+                    <span class="text-[clamp(1.25rem,4vw,1.5rem)] font-black text-primary">${p.price.toLocaleString()}</span>
                 </div>
             </div>
         `;
@@ -144,7 +165,10 @@ export function clearSearch() {
     const resultsList = document.getElementById('results-list');
     const noResults = document.getElementById('no-results');
 
-    if (searchInput) searchInput.value = '';
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+    }
     if (clearBtn) clearBtn.style.display = 'none';
     if (resultsList) resultsList.innerHTML = '';
     if (noResults) noResults.style.display = 'none';

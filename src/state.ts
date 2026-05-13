@@ -1,7 +1,7 @@
 export const STORES: Record<string, string> = {
     rawa: "متجر رواء",
     zero: "متجر زيرو",
-    dribe: "متجر درايب"
+    dribe: "متجر دريبي"
 };
 
 export let activeUser: any = null;

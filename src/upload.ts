@@ -131,15 +131,19 @@ export async function renderUploadHistory() {
     Object.keys(STORES).forEach(sid => {
         const up = storesList?.find(s => s.id === sid);
         const div = document.createElement('div');
-        div.className = 'flex flex-row justify-between items-center bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-white shadow-sm mb-3';
+        div.className = 'glass-panel rounded-2xl p-6 flex flex-row justify-between items-center border border-white shadow-sm mb-6 hover:bg-white/80 transition-colors';
         div.innerHTML = `
-            <div class="flex flex-col gap-1">
-                <span class="font-bold text-slate-800 text-[1.1rem]">${STORES[sid]}</span>
-                <div class="text-[0.85rem] text-slate-500">${up ? `آخر تحديث: ${up.last_upload_time}` : 'لم يتم الرفع مسبقاً'}</div>
+            <div class="flex flex-col gap-2">
+                <span class="font-black text-slate-800 text-lg tracking-tight">${STORES[sid]}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[0.7rem] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">
+                        ${up ? `آخر تحديث: ${up.last_upload_time}` : 'لم يتم الرفع مسبقاً'}
+                    </span>
+                </div>
             </div>
-            <div class="text-left flex flex-col items-end">
-                <div class="font-black text-indigo-600 text-[1.3rem] leading-none">${up ? up.count.toLocaleString() : 0}</div>
-                <div class="text-[0.75rem] text-slate-400 mt-1">منتج</div>
+            <div class="text-left flex flex-col items-end gap-1">
+                <div class="font-black text-primary text-2xl leading-none">${up ? up.count.toLocaleString() : 0}</div>
+                <div class="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">منتج</div>
             </div>
         `;
         list.appendChild(div);
